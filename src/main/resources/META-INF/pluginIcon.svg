@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <!-- Spring Framework leaf icon -->
+  <defs>
+    <linearGradient id="leafGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#80C441;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4E9E2D;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="stemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5AAF2B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3D8C1E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Main leaf shape (Spring logo style) -->
+  <path d="M 20 4
+    C 28 4, 36 10, 36 20
+    C 36 30, 28 36, 20 36
+    C 14 36, 8 32, 6 26
+    C 10 28, 16 27, 20 22
+    C 24 17, 24 10, 20 4 Z"
+    fill="url(#leafGrad)" />
+
+  <!-- Inner highlight -->
+  <path d="M 20 4
+    C 24 10, 24 17, 20 22
+    C 17 26, 13 27, 9 26
+    C 11 20, 15 14, 20 4 Z"
+    fill="#A8D96A" opacity="0.5" />
+
+  <!-- Stem / spiral curl -->
+  <path d="M 10 34 Q 8 28, 12 24 Q 16 20, 14 16"
+    stroke="url(#stemGrad)" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+</svg>

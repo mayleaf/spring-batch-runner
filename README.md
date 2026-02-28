@@ -1,52 +1,85 @@
 # spring-batch-runner
 
 ![Build](https://github.com/mayleaf/spring-batch-runner/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/MARKETPLACE_ID.svg)](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID)
-
-## Template ToDo list
-- [x] Create a new [IntelliJ Platform Plugin Template][template] project.
-- [ ] Get familiar with the [template documentation][template].
-- [ ] Adjust the [pluginGroup](./gradle.properties) and [pluginName](./gradle.properties), as well as the [id](./src/main/resources/META-INF/plugin.xml) and [sources package](./src/main/kotlin).
-- [ ] Adjust the plugin description in `README` (see [Tips][docs:plugin-description])
-- [ ] Review the [Legal Agreements](https://plugins.jetbrains.com/docs/marketplace/legal-agreements.html?from=IJPluginTemplate).
-- [ ] [Publish a plugin manually](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html?from=IJPluginTemplate) for the first time.
-- [ ] Set the `MARKETPLACE_ID` in the above README badges. You can obtain it once the plugin is published to JetBrains Marketplace.
-- [ ] Set the [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html?from=IJPluginTemplate) related [secrets](https://github.com/JetBrains/intellij-platform-plugin-template#environment-variables).
-- [ ] Set the [Deployment Token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html?from=IJPluginTemplate).
-- [ ] Click the <kbd>Watch</kbd> button on the top of the [IntelliJ Platform Plugin Template][template] to be notified about releases containing new features and fixes.
-- [ ] Configure the [CODECOV_TOKEN](https://docs.codecov.com/docs/quick-start) secret for automated test coverage reports on PRs
+[![Version](https://img.shields.io/jetbrains/plugin/v/30410-spring-batch-runner.svg)](https://plugins.jetbrains.com/plugin/30410-spring-batch-runner)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/30410-spring-batch-runner.svg)](https://plugins.jetbrains.com/plugin/30410-spring-batch-runner)
 
 <!-- Plugin description -->
-This Fancy IntelliJ Platform Plugin is going to be your implementation of the brilliant ideas that you have.
+**Spring Batch Runner** adds gutter run icons to Spring Batch job configuration classes, letting you launch batch jobs directly from the editor with a single click.
 
-This specific section is a source for the [plugin.xml](/src/main/resources/META-INF/plugin.xml) file which will be extracted by the [Gradle](/build.gradle.kts) during the build process.
+### How It Works
 
-To keep everything working, do not remove `<!-- ... -->` sections. 
+The plugin detects classes annotated with:
+
+```java
+@ConditionalOnProperty(name = "spring.batch.job.names", havingValue = "myJobName")
+```
+
+or the singular form `spring.batch.job.name`. When found, a **▶ Run** icon appears in the gutter next to the class name.
+
+Clicking the icon:
+1. Opens the **Edit Run Configuration** dialog pre-filled with:
+   - The `--spring.batch.job.names=<jobName>` program argument
+   - The detected Spring Boot main class
+   - Any `@Value("#{jobParameters['...']}") `parameters found in the job's component classes
+2. Runs the configuration after you confirm
+
+### Features
+
+- Works with both **Java** and **Kotlin** Spring Batch configurations
+- Supports **Spring Batch 4 & 5** (`job.names` and `job.name` property keys)
+- Detects job parameters from `@Value("#{jobParameters[...]}")` on fields, constructor parameters, and `@Bean` method parameters
+- Auto-discovers the `@SpringBootApplication` main class in your module
+- Resolves constant references in annotation attributes (static fields, companion object properties)
+- Supports **K2 compiler** mode
 <!-- Plugin description end -->
 
 ## Installation
 
-- Using the IDE built-in plugin system:
+- **IDE built-in plugin system:**
 
-  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "spring-batch-runner"</kbd> >
-  <kbd>Install</kbd>
+  <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>Marketplace</kbd> > <kbd>Search for "spring-batch-runner"</kbd> > <kbd>Install</kbd>
 
-- Using JetBrains Marketplace:
+- **JetBrains Marketplace:**
 
-  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID) and install it by clicking the <kbd>Install to ...</kbd> button in case your IDE is running.
+  Go to [JetBrains Marketplace](https://plugins.jetbrains.com/plugin/30410-spring-batch-runner) and click <kbd>Install to ...</kbd> with your IDE open.
 
-  You can also download the [latest release](https://plugins.jetbrains.com/plugin/MARKETPLACE_ID/versions) from JetBrains Marketplace and install it manually using
+  Or download the [latest release](https://plugins.jetbrains.com/plugin/30410-spring-batch-runner/versions) and install manually via
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
-- Manually:
+- **Manually from GitHub:**
 
-  Download the [latest release](https://github.com/mayleaf/spring-batch-runner/releases/latest) and install it manually using
+  Download the [latest release](https://github.com/mayleaf/spring-batch-runner/releases/latest) and install via
   <kbd>Settings/Preferences</kbd> > <kbd>Plugins</kbd> > <kbd>⚙️</kbd> > <kbd>Install plugin from disk...</kbd>
 
+## Usage
+
+Given a Spring Batch configuration class like this:
+
+```kotlin
+@Configuration
+@ConditionalOnProperty(name = "spring.batch.job.names", havingValue = "myJob")
+class MyJobConfiguration {
+
+    @Bean
+    fun myStep(
+        @Value("#{jobParameters['inputFile']}") inputFile: String,
+        @Value("#{jobParameters['date']}") date: String,
+    ): Step { ... }
+}
+```
+
+A **▶** icon will appear in the gutter next to `MyJobConfiguration`. Click it to open a pre-configured run dialog with:
+
+```
+--spring.batch.job.names=myJob inputFile= date=
+```
+
+## Requirements
+
+- IntelliJ IDEA 2025.2 or later (build 252+)
+- Java or Kotlin Spring Boot project with Spring Batch
 
 ---
-Plugin based on the [IntelliJ Platform Plugin Template][template].
 
-[template]: https://github.com/JetBrains/intellij-platform-plugin-template
-[docs:plugin-description]: https://plugins.jetbrains.com/docs/intellij/plugin-user-experience.html#plugin-description-and-presentation
+Plugin built with the [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template).
