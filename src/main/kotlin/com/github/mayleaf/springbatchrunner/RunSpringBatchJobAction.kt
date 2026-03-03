@@ -47,12 +47,6 @@ object RunSpringBatchJobAction {
     private const val BEAN_ANNOTATION_FQN =
         "org.springframework.context.annotation.Bean"
 
-    private val COMPONENT_ANNOTATION_FQNS = listOf(
-        "org.springframework.stereotype.Component",
-        "org.springframework.batch.core.configuration.annotation.StepScope",
-        "org.springframework.batch.core.configuration.annotation.JobScope",
-    )
-
     private val JOB_PARAM_PATTERN = Regex("""#\{jobParameters\[['"]?(\w+)['"]?]""")
 
     fun run(project: Project, context: PsiElement, jobName: String) {
@@ -111,6 +105,7 @@ object RunSpringBatchJobAction {
 
     private fun extractJavaJobParameters(psiClass: PsiClass, project: Project, module: Module?): List<String> {
         val params = mutableSetOf<String>()
+        // Only scan current config class and its @Bean method references
         scanJavaClassForValues(psiClass, params)
         for (method in psiClass.methods) {
             if (method.getAnnotation(BEAN_ANNOTATION_FQN) == null) continue
@@ -121,7 +116,6 @@ object RunSpringBatchJobAction {
             val returnClass = (method.returnType as? PsiClassType)?.resolve()
             if (returnClass != null && returnClass != psiClass) scanJavaClassForValues(returnClass, params)
         }
-        scanComponentClasses(project, module, params)
         return params.toList()
     }
 
@@ -171,6 +165,7 @@ object RunSpringBatchJobAction {
 
     private fun extractKotlinJobParameters(ktClass: KtClassOrObject, project: Project, module: Module?): List<String> {
         val params = mutableSetOf<String>()
+        // Only scan current config class and its @Bean method references
         scanKotlinClassForValues(ktClass, params)
         for (func in ktClass.declarations.filterIsInstance<KtNamedFunction>()) {
             if (func.annotationEntries.none { it.shortName?.asString() == "Bean" }) continue
@@ -179,7 +174,6 @@ object RunSpringBatchJobAction {
             }
             scanKtResolvedElement(resolveKtFunctionReturnType(func), ktClass, params)
         }
-        scanComponentClasses(project, module, params)
         return params.toList()
     }
 
@@ -291,27 +285,6 @@ object RunSpringBatchJobAction {
                 } else null
             }
             else -> null
-        }
-    }
-
-    private fun scanComponentClasses(project: Project, module: Module?, params: MutableSet<String>) {
-        val scope = if (module != null)
-            GlobalSearchScope.moduleScope(module)
-        else
-            GlobalSearchScope.projectScope(project)
-        val allScope = GlobalSearchScope.allScope(project)
-        val psiFacade = JavaPsiFacade.getInstance(project)
-        for (fqn in COMPONENT_ANNOTATION_FQNS) {
-            val annotationClass = psiFacade.findClass(fqn, allScope) ?: continue
-            AnnotatedElementsSearch.searchPsiClasses(annotationClass, scope).forEach(Processor { cls ->
-                val ktClass = cls.navigationElement as? KtClassOrObject
-                if (ktClass != null) {
-                    scanKotlinClassForValues(ktClass, params)
-                } else {
-                    scanJavaClassForValues(cls, params)
-                }
-                true
-            })
         }
     }
 

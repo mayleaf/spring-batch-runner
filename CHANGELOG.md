@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [1.0.7] - 2026-03-03
+
+### Changed
+
+- Only scan current BatchConfig file for @Value job parameters
+- Removed scanning of @StepScope/@JobScope/@Component classes in other files
+
 ## [1.0.5] - 2026-03-03
 
 ### Changed
