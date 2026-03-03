@@ -5,33 +5,33 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/30410-spring-batch-runner.svg)](https://plugins.jetbrains.com/plugin/30410-spring-batch-runner)
 
 <!-- Plugin description -->
-**Spring Batch Runner** adds gutter run icons to Spring Batch job configuration classes, letting you launch batch jobs directly from the editor with a single click.
+**Run Spring Batch jobs with a single click.** This plugin adds ▶ Run icons to your batch job configuration classes—no more manually typing `--spring.batch.job.names=...` every time.
 
-### How It Works
+### Quick Start
 
-The plugin detects classes annotated with:
+Just annotate your job configuration with `@ConditionalOnProperty`:
 
 ```java
-@ConditionalOnProperty(name = "spring.batch.job.names", havingValue = "myJobName")
+@Configuration
+@ConditionalOnProperty(name = "spring.batch.job.names", havingValue = "myJob")
+public class MyJobConfig { ... }
 ```
 
-or the singular form `spring.batch.job.name`. When found, a **▶ Run** icon appears in the gutter next to the class name.
+A **▶ Run** icon appears in the gutter. Click it to launch your batch job instantly.
 
-Clicking the icon:
-1. Opens the **Edit Run Configuration** dialog pre-filled with:
-   - The `--spring.batch.job.names=<jobName>` program argument
-   - The detected Spring Boot main class
-   - Any `@Value("#{jobParameters['...']}") `parameters found in the job's component classes
-2. Runs the configuration after you confirm
+### What It Does
 
-### Features
+- **Auto-fills run configuration** with `--spring.batch.job.names=<jobName>`
+- **Detects job parameters** from `@Value("#{jobParameters['paramName']}")`—no need to remember parameter names
+- **Finds your main class** automatically (looks for `@SpringBootApplication`)
 
-- Works with both **Java** and **Kotlin** Spring Batch configurations
-- Supports **Spring Batch 4 & 5** (`job.names` and `job.name` property keys)
-- Detects job parameters from `@Value("#{jobParameters[...]}")` on fields, constructor parameters, and `@Bean` method parameters
-- Auto-discovers the `@SpringBootApplication` main class in your module
-- Resolves constant references in annotation attributes (static fields, companion object properties)
-- Supports **K2 compiler** mode
+### Supported
+
+| | |
+|---|---|
+| **Languages** | Java, Kotlin |
+| **Spring Batch** | 4.x, 5.x (`job.names` and `job.name`) |
+| **Kotlin** | K2 compiler mode supported |
 <!-- Plugin description end -->
 
 ## Installation
