@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-03-03
+
+### Fixed
+
+- Fixed description: Run icon is ▶ (play button), not leaf emoji
+
 ## [1.0.3] - 2026-03-03
 
 ### Changed
@@ -40,7 +46,8 @@
 - Support for Spring Batch 4 & 5 (`spring.batch.job.names` and `spring.batch.job.name`)
 - K2 compiler mode support
 
-[Unreleased]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.3...HEAD
+[Unreleased]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.4...HEAD
+[1.0.4]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.2...1.0.3
 [1.0.2]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.1...1.0.2
 [1.0.1]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.0...1.0.1
