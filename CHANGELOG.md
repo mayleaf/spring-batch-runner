@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-03-03
+
+### Changed
+
+- Updated plugin icon to official Spring logo
+
 ## [1.0.5] - 2026-03-03
 
 ### Changed
@@ -52,7 +58,8 @@
 - Support for Spring Batch 4 & 5 (`spring.batch.job.names` and `spring.batch.job.name`)
 - K2 compiler mode support
 
-[Unreleased]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.5...HEAD
+[Unreleased]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.6...HEAD
+[1.0.6]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.5...1.0.6
 [1.0.5]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.4...1.0.5
 [1.0.4]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.3...1.0.4
 [1.0.3]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.2...1.0.3
