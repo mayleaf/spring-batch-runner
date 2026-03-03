@@ -4,13 +4,6 @@
 
 ## [Unreleased]
 
-## [1.0.1] - 2026-03-03
-
-### Changed
-
-- Improved plugin description for better clarity and readability
-- Simplified documentation with quick start guide
-
 ## [1.0.0] - 2026-03-01
 
 ### Added
@@ -22,6 +15,5 @@
 - Support for Spring Batch 4 & 5 (`spring.batch.job.names` and `spring.batch.job.name`)
 - K2 compiler mode support
 
-[Unreleased]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.1...HEAD
-[1.0.1]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.0...1.0.1
+[Unreleased]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.0...HEAD
 [1.0.0]: https://github.com/mayleaf/spring-batch-runner/commits/1.0.0

@@ -5,7 +5,7 @@
 [![Downloads](https://img.shields.io/jetbrains/plugin/d/30410-spring-batch-runner.svg)](https://plugins.jetbrains.com/plugin/30410-spring-batch-runner)
 
 <!-- Plugin description -->
-**Run Spring Batch jobs with a single click.** This plugin adds ▶ Run icons to your batch job configuration classes—no more manually typing `--spring.batch.job.names=...` every time.
+**Run Spring Batch jobs with a single click.** This plugin adds 🍃 Run icons to your batch job configuration classes—no more manually typing `--spring.batch.job.names=...` every time.
 
 ### Quick Start
 
@@ -17,7 +17,7 @@ Just annotate your job configuration with `@ConditionalOnProperty`:
 public class MyJobConfig { ... }
 ```
 
-A **▶ Run** icon appears in the gutter. Click it to launch your batch job instantly.
+A **🍃 Run** icon appears in the gutter. Click it to launch your batch job instantly.
 
 ### What It Does
 
