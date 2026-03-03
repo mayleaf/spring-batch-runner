@@ -16,16 +16,24 @@ import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiClassType
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiExpression
+import com.intellij.psi.PsiField
 import com.intellij.psi.PsiLiteralExpression
 import com.intellij.psi.PsiModifier
+import com.intellij.psi.PsiPolyadicExpression
+import com.intellij.psi.PsiReferenceExpression
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.AnnotatedElementsSearch
 import org.jetbrains.kotlin.psi.KtAnnotationEntry
 import org.jetbrains.kotlin.psi.KtClassOrObject
+import org.jetbrains.kotlin.psi.KtDotQualifiedExpression
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.KtNameReferenceExpression
 import org.jetbrains.kotlin.psi.KtNamedFunction
 import org.jetbrains.kotlin.psi.KtParameter
 import org.jetbrains.kotlin.psi.KtProperty
+import org.jetbrains.kotlin.psi.KtSimpleNameStringTemplateEntry
+import org.jetbrains.kotlin.psi.KtStringTemplateEntryWithExpression
 import org.jetbrains.kotlin.psi.KtStringTemplateExpression
 import org.jetbrains.kotlin.psi.KtUserType
 
@@ -131,10 +139,34 @@ object RunSpringBatchJobAction {
     private fun extractFromJavaAnnotation(annotation: PsiAnnotation?, params: MutableSet<String>) {
         annotation ?: return
         val value = annotation.findAttributeValue("value") ?: return
-        val text = (value as? PsiLiteralExpression)?.value as? String
-            ?: value.text?.removeSurrounding("\"")
-            ?: return
+        val text = resolveJavaExpression(value as? PsiExpression) ?: return
         JOB_PARAM_PATTERN.findAll(text).forEach { params.add(it.groupValues[1]) }
+    }
+
+    /**
+     * Resolve Java expression to string, handling:
+     * - Simple string literals: "value"
+     * - String concatenation: "prefix" + CONSTANT + "suffix"
+     * - Static field references: JobConfig.PARAM_NAME
+     */
+    private fun resolveJavaExpression(expr: PsiExpression?): String? {
+        expr ?: return null
+        return when (expr) {
+            is PsiLiteralExpression -> expr.value as? String
+            is PsiPolyadicExpression -> {
+                // Handle string concatenation: "#{jobParameters[" + CONSTANT + "]}"
+                val parts = expr.operands.mapNotNull { resolveJavaExpression(it) }
+                if (parts.size == expr.operands.size) parts.joinToString("") else null
+            }
+            is PsiReferenceExpression -> {
+                // Handle static field reference: JobConfig.PARAM_NAME or just PARAM_NAME
+                val resolved = expr.resolve()
+                if (resolved is PsiField && resolved.hasModifierProperty(PsiModifier.STATIC)) {
+                    resolveJavaExpression(resolved.initializer)
+                } else null
+            }
+            else -> expr.text?.removeSurrounding("\"")
+        }
     }
 
     private fun extractKotlinJobParameters(ktClass: KtClassOrObject, project: Project, module: Module?): List<String> {
@@ -191,8 +223,74 @@ object RunSpringBatchJobAction {
             if (annotation.shortName?.asString() != "Value") continue
             val arg = annotation.valueArgumentList?.arguments?.firstOrNull() ?: continue
             val expr = arg.getArgumentExpression() as? KtStringTemplateExpression ?: continue
-            val text = expr.entries.joinToString("") { it.text }
+            val text = resolveKtStringTemplate(expr) ?: continue
             JOB_PARAM_PATTERN.findAll(text).forEach { params.add(it.groupValues[1]) }
+        }
+    }
+
+    /**
+     * Resolve Kotlin string template to string, handling:
+     * - Simple strings: "value"
+     * - String templates with variables: "#{jobParameters[$CONSTANT]}"
+     * - Companion object properties: "#{jobParameters[${JobConfig.PARAM_NAME}]}"
+     */
+    private fun resolveKtStringTemplate(expr: KtStringTemplateExpression): String? {
+        val parts = expr.entries.map { entry ->
+            when (entry) {
+                is KtSimpleNameStringTemplateEntry -> {
+                    // Handle $variable
+                    resolveKtReference(entry.expression)
+                }
+                is KtStringTemplateEntryWithExpression -> {
+                    // Handle ${expression}
+                    resolveKtReference(entry.expression)
+                }
+                else -> entry.text
+            }
+        }
+        return if (parts.all { it != null }) parts.joinToString("") else null
+    }
+
+    /**
+     * Resolve Kotlin reference expression to its constant value
+     */
+    private fun resolveKtReference(expr: PsiElement?): String? {
+        expr ?: return null
+        return when (expr) {
+            is KtDotQualifiedExpression -> {
+                // Handle Companion.CONSTANT or ClassName.CONSTANT
+                val resolved = expr.selectorExpression?.references?.firstOrNull()?.resolve()
+                resolveKtPropertyValue(resolved)
+            }
+            is KtNameReferenceExpression -> {
+                // Handle simple CONSTANT reference
+                val resolved = expr.references.firstOrNull()?.resolve()
+                resolveKtPropertyValue(resolved)
+            }
+            else -> expr.text
+        }
+    }
+
+    /**
+     * Resolve Kotlin property or Java field to its constant value
+     */
+    private fun resolveKtPropertyValue(resolved: PsiElement?): String? {
+        return when (resolved) {
+            is KtProperty -> {
+                // Kotlin property: const val PARAM = "value"
+                val initializer = resolved.initializer
+                when (initializer) {
+                    is KtStringTemplateExpression -> resolveKtStringTemplate(initializer)
+                    else -> initializer?.text?.removeSurrounding("\"")
+                }
+            }
+            is PsiField -> {
+                // Java static field
+                if (resolved.hasModifierProperty(PsiModifier.STATIC)) {
+                    resolveJavaExpression(resolved.initializer)
+                } else null
+            }
+            else -> null
         }
     }
 

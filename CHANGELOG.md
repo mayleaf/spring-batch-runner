@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-03-03
+
+### Added
+
+- Support for resolving static field references in `@Value` annotations
+  - Java: `@Value("#{jobParameters[" + JobConfig.PARAM + "]}")`
+  - Kotlin: `@Value("#{jobParameters[$PARAM]}")` or `@Value("#{jobParameters[${Companion.PARAM}]}")`
+- Resolve companion object properties and Java static final fields
+
+### Changed
+
+- Updated plugin description with 🍃 Spring leaf icon
+
 ## [1.0.0] - 2026-03-01
 
 ### Added
@@ -15,5 +28,6 @@
 - Support for Spring Batch 4 & 5 (`spring.batch.job.names` and `spring.batch.job.name`)
 - K2 compiler mode support
 
-[Unreleased]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.0...HEAD
+[Unreleased]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.1...HEAD
+[1.0.1]: https://github.com/mayleaf/spring-batch-runner/compare/1.0.0...1.0.1
 [1.0.0]: https://github.com/mayleaf/spring-batch-runner/commits/1.0.0
